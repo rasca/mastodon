@@ -41,13 +41,14 @@ spec:
           {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command:
-            - node
-            - ./streaming
+          command: ["sh", "-c"]
+          args: ["sed -i 's/.ssl = true/.ssl = { rejectUnauthorized: false }/g' streaming/index.js && node ./streaming"]
           envFrom:
             - configMapRef:
                 name: {{ include "mastodon.fullname" . }}-env
           env:
+            - name: "DB_SSLMODE"
+              value: require
             - name: "DB_PASS"
               valueFrom:
                 secretKeyRef:
